@@ -109,7 +109,7 @@ sub main {
 
         # Construct the new file name
         my $new_filename =
-          catfile( $target_directory, "$filename$ext - $ZCUSTOMLABEL" );
+          catfile( $target_directory, "$filename - $ZCUSTOMLABEL$ext" );
 
         # If the original file exists
         if ( -e "$original_filename" ) {
