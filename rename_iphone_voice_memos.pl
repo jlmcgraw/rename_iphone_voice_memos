@@ -52,24 +52,41 @@ sub main {
     # Process the command line
     my ( $ap, $args, @ARGV ) = process_command_line();
 
-    # Examples of getting parameter values
-    my $target_directory = $args->target;
-    my $is_dry_run       = $args->dry_run;
+    # Get command line parameter values
+    my $source_directory      = $args->source_directory;
+    my $destination_directory = $args->destination_directory;
+    my $is_dry_run            = $args->dry_run;
 
-    # Make sure the target directory exists
-    unless ( -e $target_directory ) {
-        say STDERR "Target directory does not exist";
+    # Make sure the source directory exists
+    unless ( -e $source_directory ) {
+        say STDERR "Source directory \"$source_directory\" does not exist";
+        $ap->print_usage;
+        return 1;
+    }
+
+    # Make sure the destination directory exists
+    if ($destination_directory) {
+    }
+    else { 
+        # Destination defaults to being the same as the source
+        $destination_directory = $source_directory; }
+
+    # Test the destination exists and is writable
+    unless ( -w $destination_directory ) {
+        say STDERR
+          "Destination directory \"$destination_directory\" does not exist or is not writable";
         $ap->print_usage;
         return 1;
     }
 
     # Construct the path to the database
-    my $recordings_database = catfile( $target_directory, 'Recordings.db' );
+    my $recordings_database = catfile( $source_directory, 'Recordings.db' );
 
     # Make sure the database exists
     unless ( -r "$recordings_database" ) {
-        say "Database file $recordings_database does not exist";
-        die;
+        say STDERR "Database file $recordings_database does not exist";
+        $ap->print_usage;
+        return 1;
     }
 
     # connect to the database
@@ -79,7 +96,6 @@ sub main {
 
     # Query recordings database
     my $sth = $dbh->prepare("select ZCUSTOMLABEL,ZPATH from ZRECORDING");
-
     $sth->execute();
 
     my $_allSqlQueryResults = $sth->fetchall_arrayref();
@@ -100,7 +116,7 @@ sub main {
         #         say "$ZCUSTOMLABEL, $ZPATH, $filename, $dir, $ext";
 
         # Construct the path to original file
-        my $original_filename = catfile( $target_directory, "$filename$ext" );
+        my $original_filename = catfile( $source_directory, "$filename$ext" );
 
         # Provide a description if one does not already exist
         unless ($ZCUSTOMLABEL) {
@@ -109,7 +125,7 @@ sub main {
 
         # Construct the new file name
         my $new_filename =
-          catfile( $target_directory, "$filename - $ZCUSTOMLABEL$ext" );
+          catfile( $destination_directory, "$filename - $ZCUSTOMLABEL$ext" );
 
         # If the original file exists
         if ( -e "$original_filename" ) {
@@ -150,10 +166,29 @@ sub process_command_line {
     # edit/remove as needed
 
     # Add an option
-    $ap->add_arg( '--target', '-t', default => '.' , help => "The target directory" );
+    $ap->add_arg(
+        '--source-directory',
+        '-s',
+        dest    => 'source_directory',
+        default => '.',
+        help    => "Source directory with Recordings.db in it"
+    );
 
     # Add an option
-    $ap->add_arg( '--dry-run', '-n', type => 'Bool' , help => "Do a dry run, do not actually do anything" );
+    $ap->add_arg(
+        '--destination-directory',
+        '-d',
+        dest => 'destination_directory',
+        help => "If specified, copy renamed files to this directory.  Default is same as <source-directory>"
+    );
+
+    # Add an option
+    $ap->add_arg(
+        '--dry-run', 
+        '-n',
+        type => 'Bool',
+        help => "Do a dry run, do not actually do anything"
+    );
 
     # Parse the arguments
     my $args = $ap->parse_args() or $ap->print_usage;
