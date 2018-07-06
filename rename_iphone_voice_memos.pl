@@ -29,7 +29,6 @@ use Carp;
 use Config;
 use Data::Dumper;
 use File::Glob ':bsd_glob';
-use DBI;
 use File::Basename;
 use File::Copy;
 use File::Spec::Functions 'catfile';
@@ -43,6 +42,7 @@ use lib "$FindBin::Bin/local/lib/perl5";
 use Modern::Perl '2015';
 use Params::Validate qw(:all);
 use Getopt::ArgParse;    #https://github.com/mytram/perl-argparse
+use DBI;
 
 # Call the main subroutine and exit with its return code
 exit main(@ARGV);

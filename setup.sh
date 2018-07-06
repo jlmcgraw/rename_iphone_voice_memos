@@ -2,18 +2,19 @@
 set -eu                # Always put this in Bourne shell scripts
 IFS=$(printf '\n\t')  # Always put this in Bourne shell scripts
 
-#Install necessary software
+# Install necessary software
 sudo apt-get install \
-                     cpanminus \
-                     carton
-
-#Install the libraries in our cpanfile locally
+                    cpanminus \
+                    carton \
+                    build-essential
+                    
+# Install the libraries in our cpanfile locally
 carton install
 
 if [ -d .git ]
     then
-        #Setup hooks to run perltidy on git commit
-        #<<- lets the heredoc ignore leading tabs so we can indent here for 
+        # Setup hooks to run perltidy on git commit
+        # <<- lets the heredoc ignore leading tabs so we can indent here for 
         # clarity
         cat > .git/hooks/pre-commit <<- 'EOF'
         
