@@ -43,6 +43,7 @@ use Modern::Perl '2015';
 use Params::Validate qw(:all);
 use Getopt::ArgParse;    #https://github.com/mytram/perl-argparse
 use DBI;
+use File::Util;
 
 # Call the main subroutine and exit with its return code
 exit main(@ARGV);
@@ -64,14 +65,14 @@ sub main {
         return 1;
     }
 
-    # Make sure the destination directory exists
-    if ($destination_directory) {
-    }
-    else { 
-        # Destination defaults to being the same as the source
-        $destination_directory = $source_directory; }
+    # Destination is same as source unless the destination has been supplied by user
+    unless ($destination_directory) {
 
-    # Test the destination exists and is writable
+        # Destination defaults to being the same as the source
+        $destination_directory = $source_directory;
+    }
+
+    # Test that the destination exists and is writable
     unless ( -w $destination_directory ) {
         say STDERR
           "Destination directory \"$destination_directory\" does not exist or is not writable";
@@ -101,19 +102,18 @@ sub main {
     my $_allSqlQueryResults = $sth->fetchall_arrayref();
     my $_rows               = $sth->rows;
 
-    say "Processing $_rows recordings";
+    say "$_rows memos in $recordings_database";
 
     my $ZCUSTOMLABEL;
     my $ZPATH;
 
     foreach my $_row (@$_allSqlQueryResults) {
 
+        # Get info from each row
         ( $ZCUSTOMLABEL, $ZPATH ) = @$_row;
 
         # Parse the file info
         my ( $filename, $dir, $ext ) = fileparse( $ZPATH, qr/\.[^.]*/ );
-
-        #         say "$ZCUSTOMLABEL, $ZPATH, $filename, $dir, $ext";
 
         # Construct the path to original file
         my $original_filename = catfile( $source_directory, "$filename$ext" );
@@ -122,6 +122,11 @@ sub main {
         unless ($ZCUSTOMLABEL) {
             $ZCUSTOMLABEL = "No description found";
         }
+
+        # Remove invalid characters from the description so it can be used for
+        # part of the file name
+        my ($f) = File::Util->new();
+        $ZCUSTOMLABEL = $f->escape_filename($ZCUSTOMLABEL);
 
         # Construct the new file name
         my $new_filename =
@@ -179,12 +184,13 @@ sub process_command_line {
         '--destination-directory',
         '-d',
         dest => 'destination_directory',
-        help => "If specified, copy renamed files to this directory.  Default is same as <source-directory>"
+        help =>
+          "If specified, copy renamed files to this directory.  Default is same as <source-directory>"
     );
 
     # Add an option
     $ap->add_arg(
-        '--dry-run', 
+        '--dry-run',
         '-n',
         type => 'Bool',
         help => "Do a dry run, do not actually do anything"

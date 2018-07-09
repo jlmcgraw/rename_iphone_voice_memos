@@ -4,3 +4,4 @@ requires 'Params::Validate';
 requires 'Getopt::ArgParse';
 requires 'DBI';
 requires 'DBD::SQLite';
+requires 'File::Util';
