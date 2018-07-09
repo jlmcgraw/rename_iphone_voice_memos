@@ -25,6 +25,8 @@ A small perl utility to add the description of a voice memo to the file name aft
     2.  ./backup_idevice_using_ifuse.sh
 
 #### Examples
+
+~~~ 
 $ ./rename_iphone_voice_memos.pl --source-directory 2018-07-06/ --dry-run 
 
 28 memos in 2018-07-06/Recordings.db
@@ -33,3 +35,5 @@ Dry run: 2018-07-06/20171008 201309.m4a -> "2018-07-06/20171008 201309 - Bedtime
 Dry run: 2018-07-06/20171225 070601.m4a -> "2018-07-06/20171225 070601 - Christmas 2017.m4a
 Dry run: 2018-07-06/20180513 093355.m4a -> "2018-07-06/20180513 093355 - Mothers Day.m4a
 Dry run: 2018-07-06/20180523 204551.m4a -> "2018-07-06/20180523 204551 - Bedtime Chatter.m4a
+~~~
+
