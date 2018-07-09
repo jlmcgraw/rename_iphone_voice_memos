@@ -202,7 +202,7 @@ sub process_command_line {
     # Expand wildcards on command line since windows doesn't do it for us
     if ( $Config{archname} =~ m/win/ix ) {
 
-        #Expand wildcards on command line
+        # Expand wildcards on command line
         say "Expanding wildcards for Windows";
 
         # @ARGV_unmodified = @ARGV;
